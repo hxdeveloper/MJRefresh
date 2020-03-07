@@ -37,6 +37,8 @@ typedef void (^MJRefreshComponentBeginRefreshingCompletionBlock)(void) MJRefresh
 /** 结束刷新后的回调 */
 typedef void (^MJRefreshComponentEndRefreshingCompletionBlock)(void) MJRefreshDeprecated("first deprecated in 3.3.0 - Use `MJRefreshComponentAction` instead");
 
+/** 刷新控件状态回调类型 */
+typedef void (^MJRefreshStateAction)(MJRefreshState);
 /** 刷新用到的回调类型 */
 typedef void (^MJRefreshComponentAction)(void);
 
@@ -49,6 +51,8 @@ typedef void (^MJRefreshComponentAction)(void);
     __weak UIScrollView *_scrollView;
 }
 #pragma mark - 刷新回调
+/** 控件的状态回调 */
+@property (copy, nonatomic, nullable) MJRefreshStateAction refreshStateBlock;
 /** 正在刷新的回调 */
 @property (copy, nonatomic, nullable) MJRefreshComponentAction refreshingBlock;
 /** 设置回调对象和回调方法 */

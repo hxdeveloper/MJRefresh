@@ -136,6 +136,9 @@
 {
     _state = state;
     
+    if (self.refreshStateBlock) {
+        self.refreshStateBlock(_state);
+    }
     // 加入主队列的目的是等setState:方法调用完毕、设置完文字后再去布局子控件
     MJRefreshDispatchAsyncOnMainQueue([self setNeedsLayout];)
 }

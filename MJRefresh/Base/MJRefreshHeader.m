@@ -14,6 +14,7 @@ NSString * const MJRefreshHeaderRefreshingBoundsKey = @"MJRefreshHeaderRefreshin
 
 @interface MJRefreshHeader() <CAAnimationDelegate>
 @property (assign, nonatomic) CGFloat insetTDelta;
+@property (copy, nonatomic) NSMapTable<NSString *, CABasicAnimation *> *animationMap;
 @end
 
 @implementation MJRefreshHeader
@@ -152,6 +153,7 @@ NSString * const MJRefreshHeaderRefreshingBoundsKey = @"MJRefreshHeaderRefreshin
         boundsAnimation.delegate = self;
 
         [self.scrollView.layer addAnimation:boundsAnimation forKey:MJRefreshHeaderRefreshing2IdleBoundsKey];
+        [self.animationMap setObject:[self.scrollView.layer animationForKey:MJRefreshHeaderRefreshing2IdleBoundsKey] forKey:MJRefreshHeaderRefreshing2IdleBoundsKey];
         
         if (self.endRefreshingAnimationBeginAction) {
             self.endRefreshingAnimationBeginAction();
@@ -187,6 +189,7 @@ NSString * const MJRefreshHeaderRefreshingBoundsKey = @"MJRefreshHeaderRefreshin
             boundsAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
             boundsAnimation.delegate = self;
             [self.scrollView.layer addAnimation:boundsAnimation forKey:MJRefreshHeaderRefreshingBoundsKey];
+            [self.animationMap setObject:[self.scrollView.layer animationForKey:MJRefreshHeaderRefreshingBoundsKey] forKey:MJRefreshHeaderRefreshingBoundsKey];
         } else {
             [self executeRefreshingCallback];
         }
@@ -195,7 +198,7 @@ NSString * const MJRefreshHeaderRefreshingBoundsKey = @"MJRefreshHeaderRefreshin
 
 #pragma mark - CAAnimationDelegate
 - (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
-    if ([anim isEqual:[self.scrollView.layer animationForKey:MJRefreshHeaderRefreshing2IdleBoundsKey]]) {
+    if ([anim isEqual:[self.scrollView.layer animationForKey:MJRefreshHeaderRefreshing2IdleBoundsKey]] || [anim isEqual:[self.animationMap objectForKey:MJRefreshHeaderRefreshing2IdleBoundsKey]]) {
         [self.scrollView.layer removeAnimationForKey:MJRefreshHeaderRefreshing2IdleBoundsKey];
         self.pullingPercent = 0.0;
 
@@ -205,7 +208,7 @@ NSString * const MJRefreshHeaderRefreshingBoundsKey = @"MJRefreshHeaderRefreshin
         }
     }
     
-    if ([anim isEqual:[self.scrollView.layer animationForKey:MJRefreshHeaderRefreshingBoundsKey]]) {
+    if ([anim isEqual:[self.scrollView.layer animationForKey:MJRefreshHeaderRefreshingBoundsKey]] || [anim isEqual:[self.animationMap objectForKey:MJRefreshHeaderRefreshingBoundsKey]]) {
         [self.scrollView.layer removeAnimationForKey:MJRefreshHeaderRefreshingBoundsKey];
         
         CGFloat top = self.scrollViewOriginalInset.top + self.mj_h;
@@ -218,6 +221,14 @@ NSString * const MJRefreshHeaderRefreshingBoundsKey = @"MJRefreshHeaderRefreshin
         self.scrollView.userInteractionEnabled = YES;
         [self executeRefreshingCallback];
     }
+}
+
+- (NSMapTable<NSString *,CABasicAnimation *> *)animationMap
+{
+    if (!_animationMap) {
+        _animationMap = [NSMapTable<NSString *,CABasicAnimation *> strongToWeakObjectsMapTable];
+    }
+    return _animationMap;
 }
 
 #pragma mark - 公共方法
